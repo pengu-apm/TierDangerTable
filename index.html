@@ -110,11 +110,11 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans">
 </head>
 <body>
-  <h1 class="title">TierZeroTable</h1>
+  <h1>TierZeroTable</h1>
 
-  <p class="line1">Table of AD and Azure assets and whether they belong to Tier Zero.</p>
-  <p class="line2">Description of table columns and additional resources can be found here: <a href="https://github.com/SpecterOps/TierZeroTable/">https://github.com/SpecterOps/TierZeroTable</a></p>
-  <p class="line3">Hint: Click on a header to sort the table alphabetically.</p>
+  <p>Table of AD and Azure assets and whether they belong to Tier Zero.</p>
+  <p>Description of table columns and additional resources can be found here: <a href="https://github.com/SpecterOps/TierZeroTable/">https://github.com/SpecterOps/TierZeroTable</a></p>
+  <p>Hint: Click on a header to sort the table alphabetically.</p>
 
   <!-- Search Input inside a container -->
   <div class="search-container">
@@ -130,14 +130,12 @@
   <!-- "No results found" message -->
   <div id="noResultsMessage" class="no-results" style="display: none;">No results found.</div>
 
-  <!-- Include Papa Parse Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <!-- Include LinkifyJS Library -->
   <script src="https://cdn.jsdelivr.net/npm/linkifyjs@3.0.3/dist/linkify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/linkifyjs@3.0.3/dist/linkify-html.min.js"></script>
   <script>
-    // URL of the CSV file
-    var csvFileUrl = 'https://raw.githubusercontent.com/SpecterOps/TierZeroTable/main/TierZeroTable.csv';
+    // URL of the JSON file (generated from CSV)
+    var jsonFileUrl = './TierZeroTable.json';
 
     var table; // Declare table variable in global scope
     var sortDirections = {}; // To keep track of sort directions for each column
@@ -206,6 +204,8 @@
             var processedText = linkifyHtml(cellText, {
               defaultProtocol: 'https'
             });
+            // Replace newline characters with <br> so multi-line text renders
+            processedText = processedText.replace(/\r?\n/g, '<br>');
 
             // Create a temporary element to strip HTML tags and get text length
             var tempElement = document.createElement('div');
@@ -252,18 +252,17 @@
       table.appendChild(tbody);
     }
 
-    // Load Papa Parse library and initialize the table
+    // Load JSON and initialize the table
     window.onload = function() {
-      Papa.parse(csvFileUrl, {
-        download: true,
-        header: true,
-        complete: function(results) {
-          originalData = results.data.filter(function(row) {
+      fetch(jsonFileUrl)
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+          originalData = data.filter(function(row) {
             return Object.values(row).some(function(value) {
               return value !== null && value !== '';
             });
           });
-          currentData = originalData.slice(); // Copy of the original data
+          currentData = originalData.slice();
           createTable(currentData);
 
           // Add search functionality
@@ -271,7 +270,8 @@
             var filter = this.value.toLowerCase();
             var filteredData = originalData.filter(function(row) {
               return Object.values(row).some(function(value) {
-                return value.toLowerCase().indexOf(filter) > -1;
+                var str = (value === null || value === undefined) ? '' : String(value);
+                return str.toLowerCase().indexOf(filter) > -1;
               });
             });
 
@@ -291,8 +291,12 @@
             currentData = filteredData; // Update current data
             createTable(filteredData, currentSortedColumnIndex, currentSortDirection);
           });
-        }
-      });
+        })
+        .catch(function(err) {
+          console.error('Failed to load JSON:', err);
+          document.getElementById('noResultsMessage').style.display = 'block';
+          document.getElementById('noResultsMessage').textContent = 'Failed to load data.';
+        });
     };
 
     // Sort by header function with sort indicators

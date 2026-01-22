@@ -117,3 +117,15 @@ Values:
 
 ### External links
 Links to documentation for the asset, abuse information, etc.
+
+# Local Development
+
+The site loads data from the `TierZeroTable.json` file.
+
+Run a local server e.g. using Python:
+
+```bash
+python3 -m http.server 8000
+```
+
+View the page in your browser at `http://localhost:8000/`

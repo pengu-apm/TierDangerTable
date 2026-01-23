@@ -24,11 +24,11 @@ While TierZeroTable aims to provide a comprehensive list of AD and Azure assets 
 
 # Table Columns
 
-### Name
+### Asset
 Common name of the asset.
 
-### Type
-Type of the asset.
+### Category
+Category of the asset.
 
 Values:
 - AD computer
@@ -41,8 +41,8 @@ Values:
 - DC group
 - Entra ID role
 
-### IdP
-Identity Provider of the asset.
+### Platform
+Platform of the asset.
 
 Values:
 - Active Directory
@@ -54,10 +54,10 @@ How the asset can be identified. E.g., SID of AD object.
 ### Description
 Description of the asset, i.e., its purpose of existence. This will be copied from Microsoft documentation if available.
 
-### Compromise by default
+### Tier Zero Default Risk
 Whether a publicly known abuse technique exists that allows compromise of Tier Zero assets using this asset. The abuse technique must work in an environment with default configurations.
 
-If a publicly known abuse technique exists it will be described in the _Reasoning_ column and links will be provided in the _External links_ column.
+If a publicly known abuse technique exists it will be described in the _Rationale_ column and links will be provided in the _References_ column.
 
 Values:
 - YES - Takeover - A publicly known abuse technique to takeover one or more Tier Zero assets exists and works in environments with default configurations.
@@ -65,10 +65,10 @@ Values:
 - NO - No publicly known abuse technique to compromise Tier Zero assets in an environment with default configurations exists.
 - IT DEPENDS - A publicly known abuse technique to takeover or disrupt Tier Zero exists and works in some configurations.
 
-### Compromise by configuration
+### Tier Zero Config Risk
 Whether a publicly known abuse technique exists that allows compromise of Tier Zero assets using this asset, which is enabled do to a common non-default (mis)configuration.
 
-If a publicly known abuse technique exists it will be described in the _Reasoning_ column and links will be provided in the _External links_ column.
+If a publicly known abuse technique exists it will be described in the _Rationale_ column and links will be provided in the _References_ column.
 
 Values:
 - YES - Takeover - A publicly known abuse technique to takeover one or more Tier Zero assets exists and works in environments with a common non-default (mis)configuration.
@@ -76,7 +76,7 @@ Values:
 - NO - No publicly known abuse technique to compromise Tier Zero assets in an environment with common non-default (mis)configurations exists.
 - N/A - Compromise by default - A publicly known abuse technique to compromise Tier Zero assets exists and works in environments with default configurations, hence it does not require any special configuration.
 
-### Is Tier Zero
+### Tier Zero
 If the asset should be considered Tier Zero based on our [Definition of Tier Zero](https://github.com/SpecterOps/TierZeroTable/tree/main#definition-of-tier-zero).
 
 Values:
@@ -84,20 +84,20 @@ Values:
 - NO
 - IT DEPENDS - If the asset is Tier Zero in some legitimate configuration but not always.
 
-### Reasoning
+### Rationale
 The explanation of why the asset is or is not Tier Zero, including an abuse summary and if the asset is a security dependency for Tier Zero.
 
-### Cypher query
+### Cypher
 Cypher query to return the node representing the asset in [BloodHound](https://github.com/specterOps/BloodHound).
 
-### Microsoft privileged access security role
+### Microsoft PAS Role
 Whether the asset is included in Microsoft's [Privileged access security roles](https://learn.microsoft.com/en-us/security/privileged-access-workstations/privileged-access-security-levels#privileged) list, or has a "PRIVILEGED" label if an Entra ID role. 
 
 Values:
 - YES
 - NO
 
-### AdminSDHolder protected
+### AdminSDHolder Protected
 Whether the asset is part of the default [Protected Accounts and Groups in Active Directory](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory), which are protected with the AdminSDHolder security descriptor.
 
 Values:
@@ -105,7 +105,7 @@ Values:
 - NO
 - N/A - The asset cannot be protected by AdminSDHolder.
 
-### What is Tier Zero episode
+### Episode
 In which episode of the _What is Tier Zero_ series was this asset discussed.
 
 Values:
@@ -115,7 +115,7 @@ Values:
 - 4
 - Community contribution
 
-### External links
+### References
 Links to documentation for the asset, abuse information, etc.
 
 # Local Development

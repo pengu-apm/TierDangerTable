@@ -295,7 +295,7 @@
       </div>
 
       <div class="modal-section">
-        <label for="typeSelect"><strong>Type</strong></label><br>
+        <label for="typeSelect"><strong>Category</strong></label><br>
         <select id="typeSelect">
           <option value="">All</option>
           <!-- Options populated dynamically -->
@@ -303,37 +303,37 @@
       </div>
 
       <div class="modal-section">
-        <div><strong>IdP</strong></div>
+        <div><strong>Platform</strong></div>
         <div id="idpContainer"><!-- Options populated dynamically --></div>
       </div>
 
       <div class="modal-section">
-        <div><strong>Microsoft privileged access security role</strong></div>
+        <div><strong>Microsoft PAS Role</strong></div>
         <div id="pasContainer"><!-- Options populated dynamically --></div>
       </div>
 
       <div class="modal-section">
-        <div><strong>AdminSDHolder protected</strong></div>
+        <div><strong>AdminSDHolder Protected</strong></div>
         <div id="adminsdContainer"><!-- Options populated dynamically --></div>
       </div>
 
       <div class="modal-section">
-        <div><strong>What is Tier Zero episode</strong></div>
+        <div><strong>Episode</strong></div>
         <div id="episodeContainer"><!-- Options populated dynamically --></div>
       </div>
 
       <div class="modal-section">
-        <div><strong>Compromise by default</strong></div>
+        <div><strong>Tier Zero Default Risk</strong></div>
         <div id="compDefaultContainer"><!-- Options populated dynamically --></div>
       </div>
 
       <div class="modal-section">
-        <div><strong>Compromise by configuration</strong></div>
+        <div><strong>Tier Zero Config Risk</strong></div>
         <div id="compConfigContainer"><!-- Options populated dynamically --></div>
       </div>
 
       <div class="modal-section">
-        <div><strong>Is Tier Zero</strong></div>
+        <div><strong>Tier Zero</strong></div>
         <div id="isTierZeroContainer"><!-- Options populated dynamically --></div>
       </div>
 
@@ -416,15 +416,15 @@
 
     // Columns to hide from the main table but show in the detail panel
     const hiddenFields = new Set([
-      'IdP',
+      'Platform',
       'Identification',
       'Description',
-      'Reasoning',
-      'Cypher query',
-      'Microsoft privileged access security role',
-      'AdminSDHolder protected',
-      'What is Tier Zero episode',
-      'External links'
+      'Rationale',
+      'Cypher',
+      'Microsoft PAS Role',
+      'AdminSDHolder Protected',
+      'Episode',
+      'References'
     ]);
 
     function getRowKey(rowData) {
@@ -450,7 +450,7 @@
 
           const dd = document.createElement('dd');
           const val = rowData[h] == null ? '' : String(rowData[h]);
-          const isExternal = String(h).toLowerCase() === 'external links';
+          const isExternal = String(h).toLowerCase() === 'references';
           if (isExternal) {
             // External links: escaped + linkify-html for clickable anchors, preserve newlines
             if (typeof linkifyHtml === 'function') {
@@ -646,7 +646,7 @@
 
           // Populate Type select dynamically
           const typeSelect = document.getElementById('typeSelect');
-          const types = Array.from(new Set(originalData.map(function(r){ return r['Type']; }))).sort();
+          const types = Array.from(new Set(originalData.map(function(r){ return r['Category']; }))).sort();
           types.forEach(function(t){
             const opt = document.createElement('option');
             opt.value = t;
@@ -671,25 +671,25 @@
             });
           }
 
-          const compDefaultVals = Array.from(new Set(originalData.map(function(r){ return String(r['Compromise by default'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
-          const compConfigVals = Array.from(new Set(originalData.map(function(r){ return String(r['Compromise by configuration'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
-          const isTierZeroVals = Array.from(new Set(originalData.map(function(r){ return String(r['Is Tier Zero'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          const compDefaultVals = Array.from(new Set(originalData.map(function(r){ return String(r['Tier Zero Default Risk'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          const compConfigVals = Array.from(new Set(originalData.map(function(r){ return String(r['Tier Zero Config Risk'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          const isTierZeroVals = Array.from(new Set(originalData.map(function(r){ return String(r['Tier Zero'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
 
           populateCheckboxes('compDefaultContainer','filter-cbd',compDefaultVals);
           populateCheckboxes('compConfigContainer','filter-cbc',compConfigVals);
           populateCheckboxes('isTierZeroContainer','filter-ist0',isTierZeroVals);
 
           // Populate dynamic options for IdP, PAS, AdminSDHolder, and Episode
-          const idpVals = Array.from(new Set(originalData.map(function(r){ return String(r['IdP'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          const idpVals = Array.from(new Set(originalData.map(function(r){ return String(r['Platform'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
           populateCheckboxes('idpContainer','filter-idp',idpVals);
 
-          const pasVals = Array.from(new Set(originalData.map(function(r){ return String(r['Microsoft privileged access security role'] || '').trim().toUpperCase(); }).filter(function(v){return v.length;}))).sort();
+          const pasVals = Array.from(new Set(originalData.map(function(r){ return String(r['Microsoft PAS Role'] || '').trim().toUpperCase(); }).filter(function(v){return v.length;}))).sort();
           populateCheckboxes('pasContainer','filter-pas',pasVals);
 
-          const adminsdVals = Array.from(new Set(originalData.map(function(r){ return String(r['AdminSDHolder protected'] || '').trim().toUpperCase(); }).filter(function(v){return v.length;}))).sort();
+          const adminsdVals = Array.from(new Set(originalData.map(function(r){ return String(r['AdminSDHolder Protected'] || '').trim().toUpperCase(); }).filter(function(v){return v.length;}))).sort();
           populateCheckboxes('adminsdContainer','filter-adminsd',adminsdVals);
 
-          const episodeVals = Array.from(new Set(originalData.map(function(r){ return String(r['What is Tier Zero episode'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          const episodeVals = Array.from(new Set(originalData.map(function(r){ return String(r['Episode'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
           populateCheckboxes('episodeContainer','filter-episode',episodeVals);
 
           // Add search functionality with small debounce
@@ -768,30 +768,30 @@
         }
 
         // Type
-        const matchesType = !filterState.type || row['Type'] === filterState.type;
+        const matchesType = !filterState.type || row['Category'] === filterState.type;
         // IdP
-        const matchesIdp = (filterState.idp.size === 0) || filterState.idp.has(row['IdP']);
+        const matchesIdp = (filterState.idp.size === 0) || filterState.idp.has(row['Platform']);
         // Microsoft privileged access security role
-        const pasVal = (row['Microsoft privileged access security role'] || '').toUpperCase();
+        const pasVal = (row['Microsoft PAS Role'] || '').toUpperCase();
         const matchesPas = (filterState.pas.size === 0) || filterState.pas.has(pasVal);
-        // AdminSDHolder protected
-        const adminsdVal = (row['AdminSDHolder protected'] || '').toUpperCase();
+        // AdminSDHolder Protected
+        const adminsdVal = (row['AdminSDHolder Protected'] || '').toUpperCase();
         const matchesAdminsd = (filterState.adminsd.size === 0) || filterState.adminsd.has(adminsdVal);
         // Episode (normalize value)
-        const epRaw = row['What is Tier Zero episode'] || '';
+        const epRaw = row['Episode'] || '';
         let epNorm = String(epRaw).trim();
         // Common capitalization normalization
         if (/community/i.test(epNorm)) epNorm = 'Community contribution';
         const matchesEpisode = (filterState.episode.size === 0) || filterState.episode.has(epNorm);
 
         // Compromise by default
-        const cbdVal = String(row['Compromise by default'] || '').trim();
+        const cbdVal = String(row['Tier Zero Default Risk'] || '').trim();
         const matchesCbd = (filterState.compDefault.size === 0) || filterState.compDefault.has(cbdVal);
         // Compromise by configuration
-        const cbcVal = String(row['Compromise by configuration'] || '').trim();
+        const cbcVal = String(row['Tier Zero Config Risk'] || '').trim();
         const matchesCbc = (filterState.compConfig.size === 0) || filterState.compConfig.has(cbcVal);
         // Is Tier Zero
-        const t0Val = String(row['Is Tier Zero'] || '').trim();
+        const t0Val = String(row['Tier Zero'] || '').trim();
         const matchesT0 = (filterState.isTierZero.size === 0) || filterState.isTierZero.has(t0Val);
 
         return matchesSearch && matchesType && matchesIdp && matchesPas && matchesAdminsd && matchesEpisode && matchesCbd && matchesCbc && matchesT0;

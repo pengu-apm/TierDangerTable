@@ -276,7 +276,7 @@
 
   <p>Table of AD and Azure assets and whether they belong to Tier Zero.</p>
   <p>Description of table columns and additional resources can be found here: <a href="https://github.com/SpecterOps/TierZeroTable/">https://github.com/SpecterOps/TierZeroTable</a></p>
-  <p>Hint: Click on a header to sort the table alphabetically.</p>
+  <p>Hint: Select an asset to view details and click on a header to sort the table alphabetically.</p>
 
   <!-- Search Input inside a container -->
   <div class="search-container">
@@ -439,15 +439,45 @@
 
       titleEl.textContent = getRowKey(rowData) || 'Details';
 
-      let html = '<dl>';
-      (allHeaders && allHeaders.length ? allHeaders : Object.keys(rowData || {})).forEach(function(h){
-        const val = rowData[h] == null ? '' : String(rowData[h]);
-        const processed = linkifyHtml(escapeHtml(val), linkifyOptions).replace(/\r?\n/g, '<br>');
-        html += '<dt>' + escapeHtml(h) + '</dt><dd>' + processed + '</dd>';
-      });
-      html += '</dl>';
+      // Build the details: special-case "External links" (linkify), render others as plain text
+      const dl = document.createElement('dl');
+      (allHeaders && allHeaders.length ? allHeaders : Object.keys(rowData || {}))
+        .filter(function(h){ return h !== keyHeader; })
+        .forEach(function(h){
+          const dt = document.createElement('dt');
+          dt.textContent = h;
+          dl.appendChild(dt);
 
-      bodyEl.innerHTML = html;
+          const dd = document.createElement('dd');
+          const val = rowData[h] == null ? '' : String(rowData[h]);
+          const isExternal = String(h).toLowerCase() === 'external links';
+          if (isExternal) {
+            // External links: escaped + linkify-html for clickable anchors, preserve newlines
+            if (typeof linkifyHtml === 'function') {
+              let processed = linkifyHtml(escapeHtml(val), linkifyOptions);
+              processed = processed.replace(/\r?\n/g, '<br>');
+              dd.innerHTML = processed;
+            } else {
+              // Fallback: render as plain text with line breaks if linkify-html not available
+              const parts = val.split(/\r?\n/);
+              parts.forEach(function(part, idx){
+                dd.appendChild(document.createTextNode(part));
+                if (idx < parts.length - 1) dd.appendChild(document.createElement('br'));
+              });
+            }
+          } else {
+            // All other fields: plain text to preserve angle brackets
+            const parts = val.split(/\r?\n/);
+            parts.forEach(function(part, idx){
+              dd.appendChild(document.createTextNode(part));
+              if (idx < parts.length - 1) dd.appendChild(document.createElement('br'));
+            });
+          }
+          dl.appendChild(dd);
+        });
+
+      bodyEl.innerHTML = '';
+      bodyEl.appendChild(dl);
       panel.setAttribute('aria-hidden', 'false');
       container.classList.add('has-detail');
     }

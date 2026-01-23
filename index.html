@@ -43,6 +43,10 @@
       padding: 12px;
       background: #f8f8f8;
       box-sizing: border-box;
+      position: sticky; /* Keep visible while scrolling */
+      top: 20px;        /* Match page padding for nice spacing */
+      max-height: calc(100vh - 40px); /* Stay within viewport */
+      overflow: auto;   /* Scroll internal content if needed */
     }
 
     .content-container.has-detail .detail-panel {
@@ -144,6 +148,11 @@
 
     tr:nth-child(even) {
       background-color: #D5D5D5;
+    }
+
+    /* Show pointer cursor when hovering over clickable rows */
+    #table tbody tr:hover {
+      cursor: pointer;
     }
 
     a:link, a:visited {
@@ -480,6 +489,8 @@
       bodyEl.appendChild(dl);
       panel.setAttribute('aria-hidden', 'false');
       container.classList.add('has-detail');
+      // Ensure the detail panel is visible even when selecting rows far down
+      try { panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) { /* noop */ }
     }
 
     function clearDetail() {

@@ -10,7 +10,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Account Operators group has GenericAll in the default security descriptor on the AD object classes: User, Group, and Computer. That means all objects of these types will be under full control of Account Operators unless they are protected with AdminSDHolder. Not all Tier Zero objects will be protected with AdminSDHolder typically, as not all Tier Zero objects will be included in Protected Accounts and Groups. This means Account Operators members have a path to compromise Tier Zero most often.\r\n\r\nIt is possible to delete all GenericAll ACEs for Account Operators on Tier Zero objects. To protect future Tier Zero objects, one would have to either remove the Account Operators ACE from the default security descriptors or implement a process of removing the ACEs as Tier Zero objects are being created. However, we recommend not using the group and classifying it as Tier Zero instead.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH 'S-1-5-32-548'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "1",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#account-operators\r\nhttps://www.whiteoaksecurity.com/blog/account-operators-privilege-escalation/\r\nhttps://specterops.io/blog/2025/06/25/untrustworthy-trust-builders-account-operators-replicating-trust-attack-aorta/\r\nhttps://bloodhound.specterops.io/resources/edges/generic-all"
@@ -26,7 +26,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Administrators group has full control over most of AD's essential objects and are inarguably part of Tier Zero.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH 'S-1-5-32-544'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "1",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#administrators"
@@ -42,7 +42,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Backup Operators group has the SeBackupPrivilege and SeRestorePrivilege rights on the domain controllers by default. These privileges allow members to access all files on the domain controllers, regardless of their permission, through backup and restore operations. Additionally, Backup Operators have full remote access to the registry of domain controllers. To compromise the domain, members of Backup Operators can dump the registry hives of a domain controller remotely, extract the domain controller account credentials, and perform a DCSync attack. Alternative ways to compromise the domain exist as well. The group is considered Tier Zero because of these known abuse techniques.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH 'S-1-5-32-551'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "1",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#backup-operators\r\nhttps://book.hacktricks.xyz/windows-hardening/active-directory-methodology/privileged-groups-and-token-privileges#backup-operators-1"
@@ -58,7 +58,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Cryptographic Operators group has the local privilege on domain controllers to perform cryptographic operations but no privilege to log in.\r\n\r\nThere are no known ways to abuse the membership of the group to compromise Tier Zero. The local privilege the group has on the domain controllers is considered security dependencies, and the group is therefore considered Tier Zero.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH 'S-1-5-32-569'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "1",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#cryptographic-operators"
@@ -74,7 +74,7 @@
     "Is Tier Zero": "IT DEPENDS",
     "Reasoning": "DHCP Administrators can escalate privileges to Tier Zero when DHCP runs on domain controllers or Tier Zero systems. Akamai research demonstrates privilege escalation via DHCP option abuse, enabling Kerberos coercion attacks followed by AD CS relay attacks. This can lead to compromise of the DHCP machine account and potentially the domain controller.\r\n\r\nWhen DHCP runs only on network appliances without access to domain infrastructure, the group is limited to Tier 1. However, with 57% of environments running DHCP on domain controllers, this represents a Tier Zero risk in common deployments.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.name STARTS WITH 'DHCP ADMINISTRATORS@'\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "Community contribution",
     "External links": "https://www.akamai.com/blog/security-research/abusing-dhcp-administrators-group-for-privilege-escalation-in-windows-domains"
@@ -90,7 +90,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Distributed COM Users group has local privileges on domain controllers to launch, activate, and use Distributed COM objects but no privilege to log in.\r\n\r\nThere are no known ways to abuse the membership of the group to compromise Tier Zero. The local privileges the group has on the DCs are considered security dependency, and the group is therefore considered Tier Zero.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH 'S-1-5-32-562'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "1",
     "External links": "https://decoder.cloud/2024/04/24/hello-im-your-domain-admin-and-i-want-to-authenticate-against-you/\r\nhttps://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#distributed-com-users"
@@ -106,7 +106,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Domain Admins group has full control over most of AD's essential objects and are inarguably part of Tier Zero.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH '-512'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "1",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#domain-admins"
@@ -122,7 +122,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Domain Controllers group has the GetChangesAll privilege on the domain. This is not enough to perform DCSync, where the GetChanges privilege is also required.\r\n\r\nThere are no known ways to abuse membership in this group to compromise Tier Zero. However, the GetChangesAll privilege is considered a security dependency that should only be held by Tier Zero principals. Additionally, control over the group allows one to impact the operability of Tier Zero by removing domain controllers from the group, which breaks AD replication. The group is therefore considered Tier Zero.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH '-516'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "1",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#domain-controllers"
@@ -138,7 +138,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Enterprise Admins group has full control over most of AD's essential objects and are inarguably part of Tier Zero.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH '-519'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "1",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#enterprise-admins "
@@ -154,7 +154,7 @@
     "Is Tier Zero": "NO",
     "Reasoning": "The Group Policy Creator Owners group has the privilege to create new GPOs. However, members of the group can only edit or delete GPOs that they have created themselves. The group has no privileges to link GPOs to an OU, a site, or the domain.\r\n\r\nThere are no known ways to abuse membership of the Group Policy Creator Owners group to compromise Tier Zero. The group is not a security dependency for Tier Zero and is therefore not considered Tier Zero.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH '-520'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "1",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#group-policy-creator-owners"
@@ -170,7 +170,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Print Operators group has the local privilege on the domain controllers to load device drivers and can log on locally on domain controllers by default.\r\n\r\nIt is feasible to remove the logon privilege from the group on the domain controllers, such that the group has no known abusable path to Tier Zero. However, the local privilege to load device drivers is considered a security dependency for the domain controllers, and the group is therefore considered Tier Zero.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH 'S-1-5-32-550'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "1",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#print-operators\r\nhttps://book.hacktricks.xyz/windows-hardening/active-directory-methodology/privileged-groups-and-token-privileges#print-operators"
@@ -186,7 +186,7 @@
     "Is Tier Zero": "NO",
     "Reasoning": "The Read-only Domain Controllers group has no compromising privileges, and there are no known ways to abuse membership in the group to compromise Tier Zero.\r\n\r\nWhether the group is a security dependency for read-only domain controller servers is not clear, but read-only domain controller servers are not considered Tier Zero (only the read-only domain controller AD objects are). The Read-only Domain Controllers group is therefore not considered Tier Zero. We will dive deeper into how read-only domain controllers should be handled in one of the following blog posts.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH '-521'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "1",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#read-only-domain-controllers"
@@ -202,7 +202,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Schema Admins group has full control over the AD schema. This allows the group members to create or modify ACEs for future AD objects. An attacker could grant full control to a compromised principal on any object type and wait for the next Tier Zero asset to be created, to then have a path to Tier Zero. This attack could be remediated by removing any unwanted ACEs on objects before they are promoted to Tier Zero, but we recommend considering the group as Tier Zero instead.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH '-518'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "1",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#schema-admins\r\nhttps://cube0x0.github.io/Pocing-Beyond-DA/#schema-admins"
@@ -218,7 +218,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Server Operators group has local privileges on the domain controllers and perform administrative operations as creating backups of all files. The group can log on locally on domain controllers by default.\r\n\r\nIt is feasible to remove the logon privilege from the group on the domain controllers, such that the group has no known abusable path to Tier Zero. However, the local privileges are considered security dependencies for the domain controllers, and the groups are therefore considered Tier Zero.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH 'S-1-5-32-549'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "1",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#server-operators\r\nhttps://cube0x0.github.io/Pocing-Beyond-DA/#server-operators"
@@ -234,7 +234,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The built-in Administrator account has admin access to DCs by default and is therefore Tier Zero.",
     "Cypher query": "MATCH (n:User)\r\nWHERE n.objectid ENDS WITH '-500'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "2",
     "External links": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/dn745899(v=ws.11)?redirectedfrom=MSDN#administrator-account"
@@ -250,7 +250,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The permissions configured on AdminSDHolder is a template that will be applied on Protected Groups and Users, by default every hour. Control over AdminSDHolder means you have control over the Protected Groups (and their members) and Users, which include Tier Zero groups such as Domain Admins. The AdminSDHolder container is therefore a Tier Zero object.",
     "Cypher query": "MATCH (n:Domain)\r\nMATCH (m:Container)\r\nWHERE m.distinguishedname = 'CN=ADMINSDHOLDER,CN=SYSTEM,' + n.distinguishedname\r\nRETURN m",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "2",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory"
@@ -266,7 +266,7 @@
     "Is Tier Zero": "NO",
     "Reasoning": "The Allowed RODC Password Replication Group has no control by default. By default, this group is included in the msDS-RevealOnDemandGroup attribute of RODC computer objects, meaning that the RODC can retrieve the credentials of members of the group. Control over the group could potentially cause an attack path to Tier Zero if the attacker has administrative access to an RODC host and the RODC is misconfigured to not deny replication of Tier Zero principals. An attacker could add a targeted Tier Zero user to this group. With admin access to an RODC computer, the attacker can dump the RODC krbtgt account to create a Golden RODC TGT for the targeted Tier Zero user. This Golden RODC TGT can be exchanged with a real TGT when the targeted user is in the msDS-RevealOnDemandGroup attribute through the membership of Allowed RODC Password Replication Group, unless the target user is in the msDS-NeverRevealGroup attribute.\r\n\r\nAll Tier Zero users and computers should be in the msDS-NeverRevealGroup attribute to ensure they cannot be compromised by being added to the Allowed RODC Password Replication Group. When this practice is followed, this group can be treated as a non-Tier Zero group and non-Tier Zero admins can manage membership of the group.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH '-571'\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "2",
     "External links": "https://posts.specterops.io/at-the-edge-of-tier-zero-the-curious-case-of-the-rodc-ef5f1799ca06\r\nhttps://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#allowed-rodc-password-replication"
@@ -282,7 +282,7 @@
     "Is Tier Zero": "NO",
     "Reasoning": "The Denied RODC Password Replication Group has no control by default. By default, this group is included in the msDS-NeverRevealGroup attribute of RODC computer objects, meaning that the RODC cannot retrieve the credentials of members of the group. Control over the group could potentially cause an attack path to Tier Zero if the attacker has administrative access to the OS of an RODC and a target Tier Zero principal is in the msDS-RevealOnDemandGroup attribute by group membership. The attacker could remove the targeted Tier Zero principal from the Denied RODC Password Replication Group, and with admin access to the RODC computer, the attacker could dump the RODC krbtgt account to create a Golden RODC TGT for the targeted Tier Zero principal. This Golden RODC TGT can be exchanged with a real TGT now the targeted user is no longer in msDS-NeverRevealGroup.\r\n\r\nAll Tier Zero users and computers should be in the msDS-NeverRevealGroup attribute by dedicated Tier Zero groups to ensure they cannot be compromised through RODCs, rather than through membership of this group. When this practice is followed, this group can be treated as a non-Tier Zero group and non-Tier Zero admins can manage membership of this group.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH '-572'\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "2",
     "External links": "https://posts.specterops.io/at-the-edge-of-tier-zero-the-curious-case-of-the-rodc-ef5f1799ca06\r\nhttps://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#denied-rodc-password-replication"
@@ -298,7 +298,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "Inheritance is not disabled by default on DCs and RODCs, which means they can inherit permissions placed on the Domain Controllers OU. An attacker could thereby grant themselves GenericAll on DCs and RODCs, which enable the attacker to perform a domain compromise. If the attacker has the privilege to create or modify GPOs, the attacker could compromise DCs with a malicious GPO. For these reasons, the Domain Controllers OU is Tier Zero.",
     "Cypher query": "MATCH (n:Domain)\r\nMATCH (m:OU)\r\nWHERE m.distinguishedname = 'OU=DOMAIN CONTROLLERS,' + n.distinguishedname\r\nRETURN m",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "2",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/delegating-administration-of-default-containers-and-ous#domain-controller-ou"
@@ -314,7 +314,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "An attacker with control over the domain root object can compromise the domain in multiple ways, for example by a DCSync attack (see reference). The domain root object is therefore Tier Zero.",
     "Cypher query": "MATCH (n:Domain)\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "2",
     "External links": "https://adsecurity.org/?p=1729"
@@ -330,7 +330,7 @@
     "Is Tier Zero": "NO",
     "Reasoning": "The group has no Tier Zero privileges and is not a security dependency for Tier Zero. The Enterprise Read-only Domain Controllers group has the GetChanges privilege on all domains in the forest. This is not enough to perform DCSync, where the GetChangesAll privilege is also required.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH '-498'\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "2",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#enterprise-read-only-domain-controllers"
@@ -346,7 +346,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "Control over a GPO allows you to compromise users and computers affected by the GPO (see references). If a GPO is linked to a Tier Zero container (Domain, OU, or Site), then the GPO is Tier Zero. ",
     "Cypher query": "MATCH (n:GPO)-[:GPLink]->()-[:Contains]->(m:Base)\r\nWHERE 'admin_tier_0' IN split(m.system_tags, ' ')\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "2",
     "External links": "https://learn.microsoft.com/en-us/previous-versions/windows/desktop/policy/group-policy-objects\r\nhttps://wald0.com/?p=179\r\nhttps://www.trustedsec.com/blog/weaponizing-group-policy-objects-access/"
@@ -362,7 +362,7 @@
     "Is Tier Zero": "NO",
     "Reasoning": "Control over a GPO allows you to compromise users and computers affected by the GPO (see references). If a GPO is not linked to a Tier Zero container (Domain, OU, or Site), then the GPO does not effect Tier Zero principals and is therefore not Tier Zero. ",
     "Cypher query": "MATCH (n:GPO)\r\nOPTIONAL MATCH p = (n)-[:GPLink]->()-[:Contains]->(m:Base)\r\nWHERE 'admin_tier_0' IN split(m.system_tags, ' ')\r\nWITH n,p\r\nWHERE p IS NULL\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "2",
     "External links": "https://learn.microsoft.com/en-us/previous-versions/windows/desktop/policy/group-policy-objects\r\nhttps://wald0.com/?p=179\r\nhttps://www.trustedsec.com/blog/weaponizing-group-policy-objects-access/"
@@ -378,7 +378,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The krbtgt's credentials allow one to create golden ticket and compromise the domain. Therefore, if you obtain the credentials of this account, then you can authenticate as any Tier Zero user. However, there is currently no known privilege on the object to obtain the Kerberos keys or to compromise the account in any other way. When you reset the password of krbtgt, AD will ignore your password input and use a random string instead. So, the reset password privilege does not work for a compromise. An attacker could use the reset password privilege to harm Tier Zero, as a double password reset causes all Kerberos TGTs in the domain to become invalid. So, since control over the account can harm Tier Zero, and there is no reason for delegating control to non-Tier Zero, the krbtgt is Tier Zero.",
     "Cypher query": "MATCH (n:User)\r\nWHERE n.objectid ENDS WITH '-502'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "2",
     "External links": "https://adsecurity.org/?p=483\r\nhttps://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/dn745899(v=ws.11)?redirectedfrom=MSDN#krbtgt-account"
@@ -394,7 +394,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "An attacker with control over a RODC computer object can compromise Tier Zero principals. The attacker can modify the msDS-RevealOnDemandGroup and msDS-NeverRevealGroup attributes of the RODC computer object such that the RODC can retrieve the credentials of a targeted Tier Zero principal. The attacker can obtain admin access to the OS of the RODC through the managedBy attribute, from where they can obtain the credentials of the RODC krbtgt account. With that, the attacker can create a RODC golden ticket for the target principal. This ticket can be converted to a real golden ticket as the target has been added to the msDS-RevealOnDemandGroup attribute and is not protected by the msDS-NeverRevealGroup attribute. Therefore, the RODC computer object is Tier Zero.",
     "Cypher query": "MATCH (n:Computer)-[:MemberOf]->(m:Group) \r\nWHERE m.objectid ENDS WITH '-521'\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "2",
     "External links": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/cc732801(v=ws.10)\r\nhttps://posts.specterops.io/at-the-edge-of-tier-zero-the-curious-case-of-the-rodc-ef5f1799ca06"
@@ -410,7 +410,7 @@
     "Is Tier Zero": "NO",
     "Reasoning": "An attacker with admin access to the OS of a RODC computer can compromise any principal which is in the msDS-RevealOnDemandGroup attribute of the RODC computer object if the principal is not in the msDS-NeverRevealGroup attribute of the RODC computer object. All Tier Zero principals should be protected in the msDS-NeverRevealGroup attribute, which will prevent a compromise of Tier Zero. The RODC computer OS is not Tier Zero if that practice is followed. That means non-Tier Zero users who belong to a remote office where the RODC computer is located are allowed to log in on the RODC computer with admin access.",
     "Cypher query": "MATCH (n:Computer)-[:MemberOf]->(m:Group) \r\nWHERE m.objectid ENDS WITH '-521' \r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "N/A",
     "What is Tier Zero episode": "2",
     "External links": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/cc732801(v=ws.10)\r\nhttps://posts.specterops.io/at-the-edge-of-tier-zero-the-curious-case-of-the-rodc-ef5f1799ca06"
@@ -426,7 +426,7 @@
     "Is Tier Zero": "NO",
     "Reasoning": "The RODC krbtgt's credentials allow one to obtain a golden ticket for any account in the msDS-RevealOnDemandGroup attribute of the RODC computer object if the account is not in the msDS-NeverRevealGroup attribute. All Tier Zero principals should be protected in the msDS-NeverRevealGroup attribute, which will prevent a compromise of Tier Zero. The RODC krbtgt account is not Tier Zero if that practice is followed.",
     "Cypher query": "MATCH (n:User)\r\nWHERE n.name STARTS WITH 'KRBTGT_'\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "2",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-default-user-accounts#read-only-domain-controllers-and-the-krbtgt-account\r\nhttps://posts.specterops.io/at-the-edge-of-tier-zero-the-curious-case-of-the-rodc-ef5f1799ca06"
@@ -442,7 +442,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Users container contains multiple default Tier Zero objects by default and is therefore considered Tier Zero. The most privileged ones like Domain Admins are protected with AdminSDHolder and have ACL inheritance disabled, so control over the Users container does not enable compromise of these objects. But some Tier Zero objects such as Cert Publishers and DnsAdmins are not protected with AdminSDHolder and do have inheritance disabled, which means they can be compromised by an attacker with control over the Users container. However, the Tier Zero objects that can be compromised can only disrupt Tier Zero operation but not takeover Tier Zero.\r\n\r\nWe recommend to move all Tier Zero objects from the Users container to dedicated Tier Zero OUs to make it clear what belongs to Tier Zero in the OU structure. The Users container is not Tier Zero when this practice is followed.",
     "Cypher query": "MATCH (n:Domain)\r\nMATCH (m:Container)\r\nWHERE m.distinguishedname = 'CN=USERS,' + n.distinguishedname\r\nRETURN m",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "2",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/delegating-administration-of-default-containers-and-ous#users-and-computers-containers"
@@ -458,7 +458,7 @@
     "Is Tier Zero": "IT DEPENDS",
     "Reasoning": "The Application Administrator role can control tenant-resident apps. This includes creating new credentials for apps, which can be used to authenticate the tenant as the app's service principal and abuse the service principal privileges. The role is therefore considered Tier Zero if the tenant contains any Tier Zero service principals.",
     "Cypher query": "MATCH (n:AZRole) \r\nWHERE n.objectid STARTS WITH '9B895D92-2CD3-44C7-9D02-A6AC2D5EA5C3@'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "N/A",
     "What is Tier Zero episode": "3",
     "External links": "https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#application-administrator"
@@ -474,7 +474,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Global Administrator role is the highest privilege role in Entra ID and inarguably part of Tier Zero. It can do almost anything, and grant permission to do the things it cannot do.",
     "Cypher query": "MATCH (n:AZRole) \r\nWHERE n.objectid STARTS WITH '62E90394-69F5-4237-9190-012177145E10@'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "N/A",
     "What is Tier Zero episode": "3",
     "External links": "https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#global-administrator"
@@ -490,7 +490,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Intune Administrator role has permission to execute scripts locally on Entra-managed devices. The role has therefore a potential attack path to Tier Zero through Entra-managed devices used by Tier Zero principals. Furthermore, the Intune Administrator role can manage Conditional Access, which can be abused to lower the security of Tier Zero or prevent the operability of Tier Zero. The role is therefore considered Tier Zero.",
     "Cypher query": "MATCH (n:AZRole) \r\nWHERE n.objectid STARTS WITH '3A2C62DB-5318-420D-8D74-23AFFEE5D9D5@'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "N/A",
     "What is Tier Zero episode": "3",
     "External links": "https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#intune-administrator"
@@ -506,7 +506,7 @@
     "Is Tier Zero": "IT DEPENDS",
     "Reasoning": "The Knowledge Administrator role can control non-role-assignable groups. If any non-role-assignable group has compromising permissions over a Tier Zero asset (e.g. Contributor on a domain controller Azure VM), then the Knowledge Administrator role can add arbitrary principals to the given group and compromise Tier Zero. If no non-role-assignable group has compromising permissions over a Tier Zero asset, then there is no attack path to Tier Zero from the Knowledge Administrator role. It therefore depends on the usage of non-role-assignable groups whether the role should be considered Tier Zero.",
     "Cypher query": "MATCH (n:AZRole) \r\nWHERE n.objectid STARTS WITH 'B5A8DCF3-09D5-43A9-A639-8E29EF291470@'\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "N/A",
     "What is Tier Zero episode": "3",
     "External links": "https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#knowledge-administrator"
@@ -522,7 +522,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Partner Tier2 Support role can reset the password for any principal, including principals with the Global Administrator role. The role is therefore considered Tier Zero.",
     "Cypher query": "MATCH (n:AZRole) \r\nWHERE n.objectid STARTS WITH 'E00E864A-17C5-4A4B-9C06-F5B95A8D5BD8@'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "N/A",
     "What is Tier Zero episode": "3",
     "External links": "https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#partner-tier2-support"
@@ -538,7 +538,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Privileged Authentication Administrator role can set or reset any authentication method (including passwords) for any principal, including principals with the Global Administrator role. The role is therefore considered Tier Zero.",
     "Cypher query": "MATCH (n:AZRole) \r\nWHERE n.objectid STARTS WITH '7BE44C8A-ADAF-4E2A-84D6-AB2649E08A13@'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "N/A",
     "What is Tier Zero episode": "3",
     "External links": "https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#privileged-authentication-administrator"
@@ -554,7 +554,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Privileged Role Administrator role can grant any other admin role to any principal at the tenant level. The role is therefore considered Tier Zero.",
     "Cypher query": "MATCH (n:AZRole) \r\nWHERE n.objectid STARTS WITH 'E8611AB8-C189-46E8-94E1-60213AB1F814@'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "N/A",
     "What is Tier Zero episode": "3",
     "External links": "https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#privileged-role-administrator"
@@ -570,7 +570,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Security Administrator role has access to Live Response API (if not disabled) with permission to execute scripts locally on Entra-managed devices. The role has therefore a potential attack path to Tier Zero through Entra-managed devices used by Tier Zero principals. Furthermore, the Security Administrator role can manage Conditional Access, which can be abused to lower the security of Tier Zero or prevent the operability of Tier Zero. The role is therefore considered Tier Zero.",
     "Cypher query": "MATCH (n:AZRole) \r\nWHERE n.objectid STARTS WITH '194AE4CB-B126-40B2-BD5B-6091B380977D@'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "N/A",
     "What is Tier Zero episode": "3",
     "External links": "https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#security-administrator"
@@ -586,7 +586,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The AIA CA objects may represent offline enterprise CAs or cross CAs. In such cases, deleting the AIA CA object would cause certificates, potentially of Tier Zero principals, to lose trust. We therefore recommend to treat AIACAs as Tier Zero.",
     "Cypher query": "MATCH (n:AIACA) \r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "4",
     "External links": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn786443(v=ws.11)\r\nhttps://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf"
@@ -602,7 +602,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Cert Publishers group has full control permissions on root CA and AIA CA objects. This enables an attacker to add or remove certificates for these objects, which are trusted throughout the AD forest. As certificate authentication requires the certificate to chain up to a trusted root CA, an attacker could prevent successful authentication for AD accounts and disrupt Tier Zero operations. The group is therefore Tier Zero.\r\n\r\nIn some environments, the group also has full control over the NTAuth store. In that scenario, the group can take over the forest by adding a forged root certificate, making it trusted for NTAuth.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH '-517'\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "4",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#cert-publishers\r\nhttps://decoder.cloud/2023/11/20/a-deep-dive-in-cert-publishers-group/"
@@ -618,7 +618,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "Control over a certificate template enables the ADCS ESC4 attack and Tier Zero takeover if the template is published to a CA trusted in the NTAuth store and that chains up to a trusted root CA. There are default templates that meet this requirement; others remain unpublished. A template cannot be used if it is not published, making control over an unpublished object less concerning. However, if it is ever published, it becomes a risk. We, therefore, recommend treating all certificate templates as Tier Zero objects, whether published or not.",
     "Cypher query": "MATCH (n:CertTemplate) \r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "4",
     "External links": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn786443(v=ws.11)\r\nhttps://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf"
@@ -634,7 +634,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "Control over an enterprise CA object enables an attacker to publish certificate templates. If any templates that allow ADCS domain escalation exist but are unpublished, then control over the enterprise CA object could enable a takeover of Tier Zero. An attacker could potentially also disrupt or takeover Tier Zero by deleting the certificate of the enterprise CA or changing the DNShostName of the enterprise CA to an attcker-controlled host. Enterprise CA objects are therfore Tier Zero.\r\n\r\nIf the enterprise CA certificate is removed from the NTAuth store, certificates from this CA cannot be used for domain authentication, thus preventing a Tier Zero takeover.",
     "Cypher query": "MATCH (n:EnterpriseCA) \r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "4",
     "External links": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn786443(v=ws.11)\r\nhttps://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf"
@@ -650,7 +650,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "Enterprise CAs can by default issue certificates that enable authentication as anyone, thereby allowing takeover of Tier Zero. An attacker with admin rights on an enterprise CA can obtain a certificate as any user in different ways. One option is to dump the private key of the CA and craft a 'golden certificate' as a target user. This attack can be prevented by protecting the private key with hardware. Alternatively, the attacker can publish any template, modify pending certificate requests, and issue denied requests, which typically also enable a takeover of Tier Zero. Enterprise CA computer objects are therefore Tier Zero.\r\n\r\nIf the enterprise CA certificate is removed from the NTAuth store, then certificates from this CA cannot be used for domain authentication, thus preventing a Tier Zero takeover.",
     "Cypher query": "MATCH (n:Computer)-[:HostsCAService]->(m:EnterpriseCA) \r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "4",
     "External links": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn786443(v=ws.11)\r\nhttps://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf"
@@ -666,7 +666,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Exchange Trusted Subsystem group has takeover permissions on all users with the default ACL inheritance enabled from the domain, regardless of the permission model Exchange is configured to. The compromising permission is write access to the AltSecurityIdentities attribute, which allows an attacker to add an explicit mapping for the user for domain authentication. Typically, some Tier Zero users inherit permissions from the domain. The group is therefore Tier Zero.\r\n\r\nThe group can only be treated as non-Tier Zero if all Tier Zero users are protected from this compromising permission.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.name STARTS WITH 'EXCHANGE TRUSTED SUBSYSTEM@'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "4",
     "External links": "https://learn.microsoft.com/en-us/exchange/permissions/split-permissions/configure-exchange-for-shared-permissions?view=exchserver-2019\r\nhttps://posts.specterops.io/pwned-by-the-mail-carrier-0750edfad43b"
@@ -682,7 +682,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Exchange Windows Permissions group has takeover permissions on all users (WriteDACL and reset password) and all groups (edit membership) with the default ACL inheritance enabled from the domain, if Exchange is configured with the default shared permission model or the RBAC split model. Typically, some Tier Zero users and groups inherit permissions from the domain. The group is therefore Tier Zero.\r\n\r\nIf Exchange is configured in the AD split model, then this group has no compromising permissions and can be treated as non-Tier Zero.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.name STARTS WITH 'EXCHANGE WINDOWS PERMISSIONS@'\r\nRETURN n",
-    "Privileged access security role": "YES",
+    "Microsoft privileged access security role": "YES",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "4",
     "External links": "https://learn.microsoft.com/en-us/exchange/permissions/split-permissions/configure-exchange-for-shared-permissions?view=exchserver-2019\r\nhttps://posts.specterops.io/pwned-by-the-mail-carrier-0750edfad43b"
@@ -698,7 +698,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The NTAuth store is a security dependency for Tier Zero. A certificate that impersonates any user in AD must chain up to a trusted root CA and be issued by a CA trusted by the NTAuth store. With control over a root CA and the NTAuth store, an attacker can make an attacker-controlled root CA certificate meet these requirements and issue certificates as anyone, taking over Tier Zero. Control over the NTAuth store alone may be sufficient to disrupt Tier Zero operations, as the attacker can delete CA certificates that Tier Zero principals or systems rely on for authentication. The NTAuth store is therefore Tier Zero.",
     "Cypher query": "MATCH (n:NTAuthStore) \r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "4",
     "External links": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn786443(v=ws.11)\r\nhttps://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf\r\nhttps://www.gradenegger.eu/en/cleaning-up-the-ntauthcertificates-object/"
@@ -714,7 +714,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "A root CA is a security dependency for Tier Zero. A certificate that impersonates any user in AD must chain up to a trusted root CA and be issued by a CA trusted by the NTAuth store. With control over a root CA and the NTAuth store, an attacker can make an attacker-controlled root CA certificate meet these requirements and issue certificates as anyone, taking over Tier Zero. Control over a root CA alone may be sufficient to disrupt Tier Zero operations, as the attacker can delete root CA certificates that Tier Zero principals or systems rely on for authentication. Root CA objects are therefore Tier Zero.",
     "Cypher query": "MATCH (n:RootCA) \r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "4",
     "External links": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn786443(v=ws.11)\r\nhttps://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf"
@@ -730,7 +730,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "DnsAdmins controls DNS which enables an attacker to trick a privileged victim to authenticate against an attacker-controlled host as it was another host. This enables a Kerberos relay attack. Also, control over DNS enables disruption of Tier Zero since Kerberos depends on DNS by default.\r\n\r\nThe group could previously use a feature in the Microsoft DNS management protocol to make the DNS service load any DLL and thereby obtain a session as SYSTEM on the DNS server. This vulnerability was patched in Dec 2021.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.name STARTS WITH 'DNSADMINS@'\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "Community contribution",
     "External links": "https://googleprojectzero.blogspot.com/2021/10/using-kerberos-for-authentication-relay.html\r\nhttps://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html"
@@ -746,7 +746,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Enterprise Key Admins group has write access to the msds-KeyCredentialLink attribute on all users (not protected by AdminSDHolder) and on all computers in the AD forest. This enables the group to compromise all these principals through Shadow Credentials attacks. The group is therefore considered Tier Zero.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH '-527'\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "Community contribution",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#enterprise-key-admins\r\nhttps://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab"
@@ -762,7 +762,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Key Admins group has write access to the msds-KeyCredentialLink attribute on all users (not protected by AdminSDHolder) and on all computers in the AD domain. This enables the group to compromise all these principals through Shadow Credentials attacks. The group is therefore considered Tier Zero.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH '-526'\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "YES",
     "What is Tier Zero episode": "Community contribution",
     "External links": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#key-admins\r\nhttps://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab"
@@ -778,7 +778,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Performance Log Users group has local privileges on domain controllers to launch, activate, and use Distributed COM objects but no privilege to log in.\r\n\r\nThere are no known ways to abuse the membership of the group to compromise Tier Zero. The local privileges the group has on the DCs are considered security dependency, and the group is therefore considered Tier Zero.",
     "Cypher query": "MATCH (n:Group)\r\nWHERE n.objectid ENDS WITH 'S-1-5-32-559'\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "Community contribution",
     "External links": "https://decoder.cloud/2024/04/24/hello-im-your-domain-admin-and-i-want-to-authenticate-against-you/\r\nhttps://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#performance-log-users"
@@ -794,7 +794,7 @@
     "Is Tier Zero": "YES",
     "Reasoning": "The Incoming Forest Trust Builders group can create inbound forest trusts with TGT delegation enabled, which can contribute to a full domain compromise (see external link).",
     "Cypher query": "MATCH (n:Group)\r\n\r\nWHERE n.objectid ENDS WITH 'S-1-5-32-557'\r\n\r\nRETURN n",
-    "Privileged access security role": "NO",
+    "Microsoft privileged access security role": "NO",
     "AdminSDHolder protected": "NO",
     "What is Tier Zero episode": "Community contribution",
     "External links": "https://specterops.io/blog/2025/06/25/untrustworthy-trust-builders-account-operators-replicating-trust-attack-aorta/"

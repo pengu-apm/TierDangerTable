@@ -17,6 +17,69 @@
       max-width: 100%;
     }
 
+    .content-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .content-container.has-detail .table-container {
+      flex: 0 0 60%;
+      max-width: 60%;
+    }
+
+    .content-container .table-container {
+      flex: 1 1 auto;
+      max-width: 100%;
+    }
+
+    .detail-panel {
+      display: none;
+      flex: 0 0 calc(40% - 20px);
+      max-width: calc(40% - 20px);
+      margin-right: 20px;
+      border: 1px solid #888;
+      border-radius: 6px;
+      padding: 12px;
+      background: #f8f8f8;
+      box-sizing: border-box;
+    }
+
+    .content-container.has-detail .detail-panel {
+      display: block;
+    }
+
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .detail-title {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .detail-body dl {
+      margin: 0;
+    }
+
+    .detail-body dt {
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    .detail-body dd {
+      margin: 4px 0 8px 0;
+    }
+
+    .selected-row {
+      outline: 2px solid #555;
+      outline-offset: -2px;
+      background-color: #e9f3ff;
+    }
+
     .search-container {
       max-width: 100%;
       overflow-x: auto;
@@ -245,7 +308,7 @@
       </div>
 
       <div class="modal-section">
-        <div><strong>Microsoft: Privileged access security roles</strong></div>
+        <div><strong>Microsoft privileged access security role</strong></div>
         <div id="pasContainer"><!-- Options populated dynamically --></div>
       </div>
 
@@ -281,10 +344,22 @@
     </div>
   </div>
 
-  <div class="table-container">
-    <table id="table" aria-describedby="tableHint">
-      <!-- Table content will be inserted here by JavaScript -->
-    </table>
+  <div id="contentContainer" class="content-container">
+    <div class="table-container">
+      <table id="table" aria-describedby="tableHint">
+        <!-- Table content will be inserted here by JavaScript -->
+      </table>
+    </div>
+
+    <aside id="detailPanel" class="detail-panel" role="region" aria-labelledby="detailTitle" aria-hidden="true">
+      <div class="detail-header">
+        <span id="detailTitle" class="detail-title">Details</span>
+        <button id="closeDetailBtn" class="btn" title="Close details" aria-label="Close details">Close</button>
+      </div>
+      <div id="detailBody" class="detail-body">
+        <p class="visually-hidden">Select a row to view details.</p>
+      </div>
+    </aside>
   </div>
 
   <!-- "No results found" message -->
@@ -301,10 +376,13 @@
     let table; // Declare table variable in global scope
     let sortDirections = {}; // To keep track of sort directions for each column
     let originalData = []; // Global variable to store original data
-    let headers; // Global variable to store headers
+    let allHeaders = []; // Full set of headers from data
+    let visibleHeaders = []; // Headers shown in the table
+    let keyHeader = null; // Header used as row key (first header)
     let currentData = []; // Current displayed data
     let currentSortedColumnIndex = null; // Currently sorted column index
     let currentSortDirection = 'none'; // Current sort direction
+    let selectedRowKey = null; // Key of the currently selected row
     // Filter selections state
     const filterState = {
       type: '',
@@ -336,6 +414,56 @@
       }
     };
 
+    // Columns to hide from the main table but show in the detail panel
+    const hiddenFields = new Set([
+      'IdP',
+      'Identification',
+      'Description',
+      'Reasoning',
+      'Cypher query',
+      'Microsoft privileged access security role',
+      'AdminSDHolder protected',
+      'What is Tier Zero episode',
+      'External links'
+    ]);
+
+    function getRowKey(rowData) {
+      return String(rowData[keyHeader] || '');
+    }
+
+    function renderDetail(rowData) {
+      const container = document.getElementById('contentContainer');
+      const panel = document.getElementById('detailPanel');
+      const titleEl = document.getElementById('detailTitle');
+      const bodyEl = document.getElementById('detailBody');
+
+      titleEl.textContent = getRowKey(rowData) || 'Details';
+
+      let html = '<dl>';
+      (allHeaders && allHeaders.length ? allHeaders : Object.keys(rowData || {})).forEach(function(h){
+        const val = rowData[h] == null ? '' : String(rowData[h]);
+        const processed = linkifyHtml(escapeHtml(val), linkifyOptions).replace(/\r?\n/g, '<br>');
+        html += '<dt>' + escapeHtml(h) + '</dt><dd>' + processed + '</dd>';
+      });
+      html += '</dl>';
+
+      bodyEl.innerHTML = html;
+      panel.setAttribute('aria-hidden', 'false');
+      container.classList.add('has-detail');
+    }
+
+    function clearDetail() {
+      const container = document.getElementById('contentContainer');
+      const panel = document.getElementById('detailPanel');
+      const bodyEl = document.getElementById('detailBody');
+      selectedRowKey = null;
+      bodyEl.innerHTML = '<p class="visually-hidden">Select a row to view details.</p>';
+      panel.setAttribute('aria-hidden', 'true');
+      container.classList.remove('has-detail');
+      // remove selection highlight
+      Array.from(document.querySelectorAll('#table tbody tr.selected-row')).forEach(function(tr){ tr.classList.remove('selected-row'); });
+    }
+
     // Function to create and populate the table
     function createTable(data, sortedColumnIndex = null, sortDirection = 'none') {
       table = document.getElementById('table');
@@ -348,11 +476,10 @@
         document.getElementById('noResultsMessage').style.display = 'none';
       }
 
-      headers = Object.keys(data[0]);
       const thead = document.createElement('thead');
       const headerRow = document.createElement('tr');
 
-      headers.forEach(function(header, index) {
+      visibleHeaders.forEach(function(header, index) {
         const th = document.createElement('th');
         th.setAttribute('scope', 'col');
         th.textContent = header;
@@ -393,9 +520,14 @@
       const frag = document.createDocumentFragment();
 
       data.forEach(function(rowData) {
-        if (rowData[headers[0]] !== "") {
+        if (String(rowData[keyHeader] || '') !== "") {
           const row = document.createElement('tr');
-          headers.forEach(function(header) {
+          const key = getRowKey(rowData);
+          row.dataset.key = key;
+          row.tabIndex = 0;
+          row.addEventListener('click', function(){ handleRowSelect(rowData); });
+          row.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRowSelect(rowData); }});
+          visibleHeaders.forEach(function(header) {
             const cell = document.createElement('td');
             const cellText = rowData[header] == null ? '' : String(rowData[header]);
 
@@ -443,11 +575,26 @@
             row.appendChild(cell);
           });
           frag.appendChild(row);
+            if (selectedRowKey && key === selectedRowKey) {
+              row.classList.add('selected-row');
+            }
         }
       });
 
       tbody.appendChild(frag);
       table.appendChild(tbody);
+
+      // If selection exists, ensure detail is shown with current data
+      if (selectedRowKey) {
+        const selectedData = data.find(function(r){ return getRowKey(r) === selectedRowKey; });
+        if (selectedData) {
+          renderDetail(selectedData);
+          const selRow = table.querySelector('tbody tr[data-key="' + selectedRowKey.replace(/"/g, '\\"') + '"]');
+          if (selRow) selRow.classList.add('selected-row');
+        } else {
+          clearDetail();
+        }
+      }
     }
 
     // Load JSON and initialize the table
@@ -461,6 +608,10 @@
             });
           });
           currentData = originalData.slice();
+          // Initialize headers
+          allHeaders = Object.keys(originalData[0] || {});
+          keyHeader = allHeaders[0] || '';
+          visibleHeaders = allHeaders.filter(function(h){ return !hiddenFields.has(h); });
           createTable(currentData);
 
           // Populate Type select dynamically
@@ -502,7 +653,7 @@
           const idpVals = Array.from(new Set(originalData.map(function(r){ return String(r['IdP'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
           populateCheckboxes('idpContainer','filter-idp',idpVals);
 
-          const pasVals = Array.from(new Set(originalData.map(function(r){ return String(r['Privileged access security role'] || '').trim().toUpperCase(); }).filter(function(v){return v.length;}))).sort();
+          const pasVals = Array.from(new Set(originalData.map(function(r){ return String(r['Microsoft privileged access security role'] || '').trim().toUpperCase(); }).filter(function(v){return v.length;}))).sort();
           populateCheckboxes('pasContainer','filter-pas',pasVals);
 
           const adminsdVals = Array.from(new Set(originalData.map(function(r){ return String(r['AdminSDHolder protected'] || '').trim().toUpperCase(); }).filter(function(v){return v.length;}))).sort();
@@ -557,6 +708,9 @@
             closeFilterModal();
             applySearchAndFilters();
           });
+
+          // Close details button
+          document.getElementById('closeDetailBtn').addEventListener('click', function(){ clearDetail(); });
         })
         .catch(function(err) {
           console.error('Failed to load JSON:', err);
@@ -587,8 +741,8 @@
         const matchesType = !filterState.type || row['Type'] === filterState.type;
         // IdP
         const matchesIdp = (filterState.idp.size === 0) || filterState.idp.has(row['IdP']);
-        // Privileged access security role
-        const pasVal = (row['Privileged access security role'] || '').toUpperCase();
+        // Microsoft privileged access security role
+        const pasVal = (row['Microsoft privileged access security role'] || '').toUpperCase();
         const matchesPas = (filterState.pas.size === 0) || filterState.pas.has(pasVal);
         // AdminSDHolder protected
         const adminsdVal = (row['AdminSDHolder protected'] || '').toUpperCase();
@@ -618,8 +772,9 @@
         const n = currentSortedColumnIndex;
         const dir = currentSortDirection;
         filteredData.sort(function(a, b) {
-          const x = a[headers[n]] ? String(a[headers[n]]).toLowerCase() : '';
-          const y = b[headers[n]] ? String(b[headers[n]]).toLowerCase() : '';
+          const field = visibleHeaders[n];
+          const x = field ? (a[field] ? String(a[field]).toLowerCase() : '') : '';
+          const y = field ? (b[field] ? String(b[field]).toLowerCase() : '') : '';
           if (x < y) return dir === 'asc' ? -1 : 1;
           if (x > y) return dir === 'asc' ? 1 : -1;
           return 0;
@@ -660,8 +815,9 @@
 
       if (dir === 'asc' || dir === 'desc') {
         dataToSort.sort(function(a, b) {
-          const x = a[headers[n]] ? String(a[headers[n]]).toLowerCase() : '';
-          const y = b[headers[n]] ? String(b[headers[n]]).toLowerCase() : '';
+          const field = visibleHeaders[n];
+          const x = field ? (a[field] ? String(a[field]).toLowerCase() : '') : '';
+          const y = field ? (b[field] ? String(b[field]).toLowerCase() : '') : '';
           if (x < y) return dir === 'asc' ? -1 : 1;
           if (x > y) return dir === 'asc' ? 1 : -1;
           return 0;
@@ -672,6 +828,17 @@
 
       currentData = dataToSort; // Update current data
       createTable(dataToSort, currentSortedColumnIndex, currentSortDirection);
+    }
+
+    function handleRowSelect(rowData) {
+      const key = getRowKey(rowData);
+      selectedRowKey = key;
+      // Clear previous selection
+      Array.from(document.querySelectorAll('#table tbody tr.selected-row')).forEach(function(tr){ tr.classList.remove('selected-row'); });
+      // Highlight current row if present
+      const rowEl = document.querySelector('#table tbody tr[data-key="' + key.replace(/"/g, '\\"') + '"]');
+      if (rowEl) rowEl.classList.add('selected-row');
+      renderDetail(rowData);
     }
   </script>
 </body>

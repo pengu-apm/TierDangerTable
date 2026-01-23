@@ -90,7 +90,7 @@ The explanation of why the asset is or is not Tier Zero, including an abuse summ
 ### Cypher query
 Cypher query to return the node representing the asset in [BloodHound](https://github.com/specterOps/BloodHound).
 
-### Privileged access security role
+### Microsoft privileged access security role
 Whether the asset is included in Microsoft's [Privileged access security roles](https://learn.microsoft.com/en-us/security/privileged-access-workstations/privileged-access-security-levels#privileged) list, or has a "PRIVILEGED" label if an Entra ID role. 
 
 Values:

@@ -18,12 +18,17 @@
     .search-container {
       max-width: 100%;
       overflow-x: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
     }
 
     .search-input {
-      margin-bottom: 10px;
-      width: 100%;
-      min-width: 1000px; /* Match the table's min-width */
+      margin-bottom: 0;
+      width: 360px;
+      max-width: 100%;
+      min-width: 220px;
       padding: 8px;
       font-size: 16px;
       box-sizing: border-box;
@@ -106,8 +111,86 @@
       font-size: 18px;
       margin-top: 20px;
     }
+
+    /* Filter button */
+    .filter-btn {
+      margin-left: 0;
+      margin-left: 0;
+      padding: 6px;
+      border: none;
+      border-radius: 50%;
+      background: #eee;
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #333;
+    }
+    .filter-btn:hover { background: #e0e0e0; }
+
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.3);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      width: 730px;
+      max-width: 95%;
+      padding: 16px 20px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .modal-section {
+      margin: 12px 0;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      padding: 8px 12px;
+      border: 1px solid #888;
+      border-radius: 4px;
+      background: #eee;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: #ddd;
+      border-color: #666;
+    }
   </style>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
   <h1>TierZeroTable</h1>
@@ -119,6 +202,66 @@
   <!-- Search Input inside a container -->
   <div class="search-container">
     <input type="text" id="searchInput" class="search-input" placeholder="Search...">
+    <button id="openFilterBtn" class="filter-btn" title="Filter" aria-label="Filter">
+      <i class="fa-solid fa-filter" aria-hidden="true"></i>
+    </button>
+  </div>
+  <!-- Filter Modal -->
+  <div id="filterOverlay" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="filterTitle">
+      <div class="modal-header">
+        <span id="filterTitle" class="modal-title">Filter</span>
+        <button id="clearAllFilters" class="btn" title="Clear All">Clear All</button>
+      </div>
+
+      <div class="modal-section">
+        <label for="typeSelect"><strong>Type</strong></label><br>
+        <select id="typeSelect">
+          <option value="">All</option>
+          <!-- Options populated dynamically -->
+        </select>
+      </div>
+
+      <div class="modal-section">
+        <div><strong>IdP</strong></div>
+        <div id="idpContainer"><!-- Options populated dynamically --></div>
+      </div>
+
+      <div class="modal-section">
+        <div><strong>Microsoft: Privileged access security roles</strong></div>
+        <div id="pasContainer"><!-- Options populated dynamically --></div>
+      </div>
+
+      <div class="modal-section">
+        <div><strong>AdminSDHolder protected</strong></div>
+        <div id="adminsdContainer"><!-- Options populated dynamically --></div>
+      </div>
+
+      <div class="modal-section">
+        <div><strong>What is Tier Zero episode</strong></div>
+        <div id="episodeContainer"><!-- Options populated dynamically --></div>
+      </div>
+
+      <div class="modal-section">
+        <div><strong>Compromise by default</strong></div>
+        <div id="compDefaultContainer"><!-- Options populated dynamically --></div>
+      </div>
+
+      <div class="modal-section">
+        <div><strong>Compromise by configuration</strong></div>
+        <div id="compConfigContainer"><!-- Options populated dynamically --></div>
+      </div>
+
+      <div class="modal-section">
+        <div><strong>Is Tier Zero</strong></div>
+        <div id="isTierZeroContainer"><!-- Options populated dynamically --></div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="closeFilterBtn" class="btn" title="Cancel">Cancel</button>
+        <button id="confirmFilterBtn" class="btn primary" title="Confirm">Confirm</button>
+      </div>
+    </div>
   </div>
 
   <div class="table-container">
@@ -144,6 +287,17 @@
     var currentData = []; // Current displayed data
     var currentSortedColumnIndex = null; // Currently sorted column index
     var currentSortDirection = 'none'; // Current sort direction
+    // Filter selections state
+    var filterState = {
+      type: '',
+      idp: new Set(),
+      pas: new Set(),
+      adminsd: new Set(),
+      episode: new Set(),
+      compDefault: new Set(),
+      compConfig: new Set(),
+      isTierZero: new Set()
+    };
 
     // Function to create and populate the table
     function createTable(data, sortedColumnIndex = null, sortDirection = 'none') {
@@ -265,31 +419,91 @@
           currentData = originalData.slice();
           createTable(currentData);
 
+          // Populate Type select dynamically
+          var typeSelect = document.getElementById('typeSelect');
+          var types = Array.from(new Set(originalData.map(function(r){ return r['Type']; }))).sort();
+          types.forEach(function(t){
+            var opt = document.createElement('option');
+            opt.value = t;
+            opt.textContent = t;
+            typeSelect.appendChild(opt);
+          });
+
+          // Populate dynamic checkbox options for compromise fields and Is Tier Zero
+          function populateCheckboxes(containerId, className, values) {
+            var container = document.getElementById(containerId);
+            container.innerHTML = '';
+            values.forEach(function(val, idx){
+              var label = document.createElement('label');
+              if (idx > 0) label.style.marginLeft = '16px';
+              var input = document.createElement('input');
+              input.type = 'checkbox';
+              input.className = className;
+              input.value = val;
+              label.appendChild(input);
+              label.appendChild(document.createTextNode(' ' + val));
+              container.appendChild(label);
+            });
+          }
+
+          var compDefaultVals = Array.from(new Set(originalData.map(function(r){ return String(r['Compromise by default'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          var compConfigVals = Array.from(new Set(originalData.map(function(r){ return String(r['Compromise by configuration'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          var isTierZeroVals = Array.from(new Set(originalData.map(function(r){ return String(r['Is Tier Zero'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+
+          populateCheckboxes('compDefaultContainer','filter-cbd',compDefaultVals);
+          populateCheckboxes('compConfigContainer','filter-cbc',compConfigVals);
+          populateCheckboxes('isTierZeroContainer','filter-ist0',isTierZeroVals);
+
+          // Populate dynamic options for IdP, PAS, AdminSDHolder, and Episode
+          var idpVals = Array.from(new Set(originalData.map(function(r){ return String(r['IdP'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          populateCheckboxes('idpContainer','filter-idp',idpVals);
+
+          var pasVals = Array.from(new Set(originalData.map(function(r){ return String(r['Privileged access security role'] || '').trim().toUpperCase(); }).filter(function(v){return v.length;}))).sort();
+          populateCheckboxes('pasContainer','filter-pas',pasVals);
+
+          var adminsdVals = Array.from(new Set(originalData.map(function(r){ return String(r['AdminSDHolder protected'] || '').trim().toUpperCase(); }).filter(function(v){return v.length;}))).sort();
+          populateCheckboxes('adminsdContainer','filter-adminsd',adminsdVals);
+
+          var episodeVals = Array.from(new Set(originalData.map(function(r){ return String(r['What is Tier Zero episode'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          populateCheckboxes('episodeContainer','filter-episode',episodeVals);
+
           // Add search functionality
           document.getElementById('searchInput').addEventListener('keyup', function() {
-            var filter = this.value.toLowerCase();
-            var filteredData = originalData.filter(function(row) {
-              return Object.values(row).some(function(value) {
-                var str = (value === null || value === undefined) ? '' : String(value);
-                return str.toLowerCase().indexOf(filter) > -1;
-              });
-            });
+            applySearchAndFilters();
+          });
 
-            // Apply current sorting to the filtered data
-            if (currentSortedColumnIndex !== null && currentSortDirection !== 'none') {
-              var n = currentSortedColumnIndex;
-              var dir = currentSortDirection;
-              filteredData.sort(function(a, b) {
-                var x = a[headers[n]] ? a[headers[n]].toLowerCase() : '';
-                var y = b[headers[n]] ? b[headers[n]].toLowerCase() : '';
-                if (x < y) return dir === 'asc' ? -1 : 1;
-                if (x > y) return dir === 'asc' ? 1 : -1;
-                return 0;
-              });
-            }
-
-            currentData = filteredData; // Update current data
-            createTable(filteredData, currentSortedColumnIndex, currentSortDirection);
+          // Filter modal wiring
+          document.getElementById('openFilterBtn').addEventListener('click', function(){
+            document.getElementById('filterOverlay').style.display = 'flex';
+            document.getElementById('filterOverlay').setAttribute('aria-hidden', 'false');
+          });
+          document.getElementById('closeFilterBtn').addEventListener('click', closeFilterModal);
+          document.getElementById('clearAllFilters').addEventListener('click', function(){
+            // Reset state
+            filterState.type = '';
+            filterState.idp.clear();
+            filterState.pas.clear();
+            filterState.adminsd.clear();
+            filterState.episode.clear();
+            filterState.compDefault.clear();
+            filterState.compConfig.clear();
+            filterState.isTierZero.clear();
+            // Reset controls
+            document.getElementById('typeSelect').value = '';
+            Array.from(document.querySelectorAll('.filter-idp,.filter-pas,.filter-adminsd,.filter-episode,.filter-cbd,.filter-cbc,.filter-ist0')).forEach(function(cb){ cb.checked = false; });
+          });
+          document.getElementById('confirmFilterBtn').addEventListener('click', function(){
+            // Collect selections
+            filterState.type = document.getElementById('typeSelect').value;
+            filterState.idp = new Set(Array.from(document.querySelectorAll('.filter-idp:checked')).map(function(n){ return n.value; }));
+            filterState.pas = new Set(Array.from(document.querySelectorAll('.filter-pas:checked')).map(function(n){ return n.value; }));
+            filterState.adminsd = new Set(Array.from(document.querySelectorAll('.filter-adminsd:checked')).map(function(n){ return n.value; }));
+            filterState.episode = new Set(Array.from(document.querySelectorAll('.filter-episode:checked')).map(function(n){ return n.value; }));
+            filterState.compDefault = new Set(Array.from(document.querySelectorAll('.filter-cbd:checked')).map(function(n){ return n.value; }));
+            filterState.compConfig = new Set(Array.from(document.querySelectorAll('.filter-cbc:checked')).map(function(n){ return n.value; }));
+            filterState.isTierZero = new Set(Array.from(document.querySelectorAll('.filter-ist0:checked')).map(function(n){ return n.value; }));
+            closeFilterModal();
+            applySearchAndFilters();
           });
         })
         .catch(function(err) {
@@ -298,6 +512,70 @@
           document.getElementById('noResultsMessage').textContent = 'Failed to load data.';
         });
     };
+
+    function closeFilterModal(){
+      document.getElementById('filterOverlay').style.display = 'none';
+      document.getElementById('filterOverlay').setAttribute('aria-hidden', 'true');
+    }
+
+    function applySearchAndFilters(){
+      var searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      var filteredData = originalData.filter(function(row){
+        // Search
+        var matchesSearch = true;
+        if (searchTerm) {
+          matchesSearch = Object.values(row).some(function(value){
+            var str = (value === null || value === undefined) ? '' : String(value);
+            return str.toLowerCase().indexOf(searchTerm) > -1;
+          });
+        }
+
+        // Type
+        var matchesType = !filterState.type || row['Type'] === filterState.type;
+        // IdP
+        var matchesIdp = (filterState.idp.size === 0) || filterState.idp.has(row['IdP']);
+        // Privileged access security role
+        var pasVal = (row['Privileged access security role'] || '').toUpperCase();
+        var matchesPas = (filterState.pas.size === 0) || filterState.pas.has(pasVal);
+        // AdminSDHolder protected
+        var adminsdVal = (row['AdminSDHolder protected'] || '').toUpperCase();
+        var matchesAdminsd = (filterState.adminsd.size === 0) || filterState.adminsd.has(adminsdVal);
+        // Episode (normalize value)
+        var epRaw = row['What is Tier Zero episode'] || '';
+        var epNorm = String(epRaw).trim();
+        // Common capitalization normalization
+        if (/community/i.test(epNorm)) epNorm = 'Community contribution';
+        var matchesEpisode = (filterState.episode.size === 0) || filterState.episode.has(epNorm);
+
+        // Compromise by default
+        var cbdVal = String(row['Compromise by default'] || '').trim();
+        var matchesCbd = (filterState.compDefault.size === 0) || filterState.compDefault.has(cbdVal);
+        // Compromise by configuration
+        var cbcVal = String(row['Compromise by configuration'] || '').trim();
+        var matchesCbc = (filterState.compConfig.size === 0) || filterState.compConfig.has(cbcVal);
+        // Is Tier Zero
+        var t0Val = String(row['Is Tier Zero'] || '').trim();
+        var matchesT0 = (filterState.isTierZero.size === 0) || filterState.isTierZero.has(t0Val);
+
+        return matchesSearch && matchesType && matchesIdp && matchesPas && matchesAdminsd && matchesEpisode && matchesCbd && matchesCbc && matchesT0;
+      });
+
+      // Apply current sorting to the filtered data
+      if (currentSortedColumnIndex !== null && currentSortDirection !== 'none') {
+        var n = currentSortedColumnIndex;
+        var dir = currentSortDirection;
+        filteredData.sort(function(a, b) {
+          var x = a[headers[n]] ? a[headers[n]].toLowerCase() : '';
+          var y = b[headers[n]] ? b[headers[n]].toLowerCase() : '';
+          if (x < y) return dir === 'asc' ? -1 : 1;
+          if (x > y) return dir === 'asc' ? 1 : -1;
+          return 0;
+        });
+      }
+
+      currentData = filteredData;
+      createTable(filteredData, currentSortedColumnIndex, currentSortDirection);
+    }
 
     // Sort by header function with sort indicators
     function sortTable(n) {

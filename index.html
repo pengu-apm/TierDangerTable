@@ -204,6 +204,12 @@
     .filter-btn:hover { background: #e0e0e0; }
     .filter-btn:focus { outline: 2px solid #666; outline-offset: 2px; }
 
+    /* Active filter visual indication */
+    .filter-btn.filters-active {
+      background: #cfe3ff; /* light blue */
+      color: #0b57d0;      /* strong blue icon */
+    }
+
     /* Modal styles */
     .modal-overlay {
       position: fixed;
@@ -824,6 +830,8 @@
 
       currentData = filteredData;
       createTable(filteredData, currentSortedColumnIndex, currentSortDirection);
+      // Update filter icon active state to reflect current applied filters
+      updateFilterIconActiveState();
     }
 
     // Sort by header function with sort indicators
@@ -880,6 +888,33 @@
       const rowEl = document.querySelector('#table tbody tr[data-key="' + key.replace(/"/g, '\\"') + '"]');
       if (rowEl) rowEl.classList.add('selected-row');
       renderDetail(rowData);
+    }
+
+    // Indicate active filters on the filter button
+    function isAnyFilterActive() {
+      return Boolean(filterState.type) ||
+             filterState.idp.size > 0 ||
+             filterState.pas.size > 0 ||
+             filterState.adminsd.size > 0 ||
+             filterState.episode.size > 0 ||
+             filterState.compDefault.size > 0 ||
+             filterState.compConfig.size > 0 ||
+             filterState.isTierZero.size > 0;
+    }
+
+    function updateFilterIconActiveState() {
+      const btn = document.getElementById('openFilterBtn');
+      if (!btn) return;
+      const active = isAnyFilterActive();
+      if (active) {
+        btn.classList.add('filters-active');
+        btn.setAttribute('aria-pressed', 'true');
+        btn.title = 'Filter (active)';
+      } else {
+        btn.classList.remove('filters-active');
+        btn.setAttribute('aria-pressed', 'false');
+        btn.title = 'Filter';
+      }
     }
   </script>
 </body>

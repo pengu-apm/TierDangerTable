@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TierZeroTable</title>
   <style>
     body {
@@ -115,7 +117,6 @@
     /* Filter button */
     .filter-btn {
       margin-left: 0;
-      margin-left: 0;
       padding: 6px;
       border: none;
       border-radius: 50%;
@@ -129,6 +130,7 @@
       color: #333;
     }
     .filter-btn:hover { background: #e0e0e0; }
+    .filter-btn:focus { outline: 2px solid #666; outline-offset: 2px; }
 
     /* Modal styles */
     .modal-overlay {
@@ -188,7 +190,21 @@
       background: #ddd;
       border-color: #666;
     }
+
+    /* Visually hidden (for accessible labels) */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
@@ -201,7 +217,8 @@
 
   <!-- Search Input inside a container -->
   <div class="search-container">
-    <input type="text" id="searchInput" class="search-input" placeholder="Search...">
+    <label for="searchInput" class="visually-hidden">Search table</label>
+    <input type="text" id="searchInput" class="search-input" placeholder="Search..." aria-label="Search table">
     <button id="openFilterBtn" class="filter-btn" title="Filter" aria-label="Filter">
       <i class="fa-solid fa-filter" aria-hidden="true"></i>
     </button>
@@ -265,30 +282,31 @@
   </div>
 
   <div class="table-container">
-    <table id="csvTable">
+    <table id="table" aria-describedby="tableHint">
       <!-- Table content will be inserted here by JavaScript -->
     </table>
   </div>
 
   <!-- "No results found" message -->
-  <div id="noResultsMessage" class="no-results" style="display: none;">No results found.</div>
+  <div id="noResultsMessage" class="no-results" style="display: none;" aria-live="polite">No results found.</div>
+  <p id="tableHint" class="visually-hidden">Click a column header to sort. Use the filter button to refine results.</p>
 
   <!-- Include LinkifyJS Library -->
-  <script src="https://cdn.jsdelivr.net/npm/linkifyjs@3.0.3/dist/linkify.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/linkifyjs@3.0.3/dist/linkify-html.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/linkifyjs@3.0.3/dist/linkify.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/linkifyjs@3.0.3/dist/linkify-html.min.js"></script>
   <script>
-    // URL of the JSON file (generated from CSV)
-    var jsonFileUrl = './TierZeroTable.json';
+    // URL of the JSON file
+    const jsonFileUrl = './TierZeroTable.json';
 
-    var table; // Declare table variable in global scope
-    var sortDirections = {}; // To keep track of sort directions for each column
-    var originalData = []; // Global variable to store original data
-    var headers; // Global variable to store headers
-    var currentData = []; // Current displayed data
-    var currentSortedColumnIndex = null; // Currently sorted column index
-    var currentSortDirection = 'none'; // Current sort direction
+    let table; // Declare table variable in global scope
+    let sortDirections = {}; // To keep track of sort directions for each column
+    let originalData = []; // Global variable to store original data
+    let headers; // Global variable to store headers
+    let currentData = []; // Current displayed data
+    let currentSortedColumnIndex = null; // Currently sorted column index
+    let currentSortDirection = 'none'; // Current sort direction
     // Filter selections state
-    var filterState = {
+    const filterState = {
       type: '',
       idp: new Set(),
       pas: new Set(),
@@ -299,9 +317,28 @@
       isTierZero: new Set()
     };
 
+    // Escape HTML to prevent XSS when inserting strings
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // Linkify options to open links safely
+    const linkifyOptions = {
+      defaultProtocol: 'https',
+      attributes: {
+        rel: 'noopener noreferrer',
+        target: '_blank'
+      }
+    };
+
     // Function to create and populate the table
     function createTable(data, sortedColumnIndex = null, sortDirection = 'none') {
-      table = document.getElementById('csvTable');
+      table = document.getElementById('table');
       table.innerHTML = ''; // Clear existing table content
 
       if (data.length === 0) {
@@ -312,20 +349,21 @@
       }
 
       headers = Object.keys(data[0]);
-      var thead = document.createElement('thead');
-      var headerRow = document.createElement('tr');
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
 
       headers.forEach(function(header, index) {
-        var th = document.createElement('th');
+        const th = document.createElement('th');
+        th.setAttribute('scope', 'col');
         th.textContent = header;
-        th.onclick = function() {
-          sortTable(index);
-        };
+        th.tabIndex = 0;
+        th.addEventListener('click', function(){ sortTable(index); });
+        th.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sortTable(index); }});
         th.title = 'Click to sort by ' + header;
         th.style.position = 'relative';
 
         // Add sort icon span
-        var sortIcon = document.createElement('span');
+        const sortIcon = document.createElement('span');
         sortIcon.className = 'sort-icon';
         th.appendChild(sortIcon);
 
@@ -333,9 +371,15 @@
         if (index === sortedColumnIndex) {
           if (sortDirection === 'asc') {
             th.classList.add('sorted-asc');
+            th.setAttribute('aria-sort', 'ascending');
           } else if (sortDirection === 'desc') {
             th.classList.add('sorted-desc');
+            th.setAttribute('aria-sort', 'descending');
+          } else {
+            th.setAttribute('aria-sort', 'none');
           }
+        } else {
+          th.setAttribute('aria-sort', 'none');
         }
 
         headerRow.appendChild(th);
@@ -345,34 +389,33 @@
       table.appendChild(thead);
 
       // Populate table with data
-      var tbody = document.createElement('tbody');
+      const tbody = document.createElement('tbody');
+      const frag = document.createDocumentFragment();
 
       data.forEach(function(rowData) {
         if (rowData[headers[0]] !== "") {
-          var row = document.createElement('tr');
+          const row = document.createElement('tr');
           headers.forEach(function(header) {
-            var cell = document.createElement('td');
-            var cellText = rowData[header];
+            const cell = document.createElement('td');
+            const cellText = rowData[header] == null ? '' : String(rowData[header]);
 
-            // Process the cell text to convert URLs into hyperlinks using LinkifyJS
-            var processedText = linkifyHtml(cellText, {
-              defaultProtocol: 'https'
-            });
+            // Escape HTML first, then linkify safely
+            let processedText = linkifyHtml(escapeHtml(cellText), linkifyOptions);
             // Replace newline characters with <br> so multi-line text renders
             processedText = processedText.replace(/\r?\n/g, '<br>');
 
             // Create a temporary element to strip HTML tags and get text length
-            var tempElement = document.createElement('div');
+            const tempElement = document.createElement('div');
             tempElement.innerHTML = processedText;
-            var textContent = tempElement.textContent || tempElement.innerText || '';
+            const textContent = tempElement.textContent || tempElement.innerText || '';
 
             // Adjusted length threshold to 100 characters
             if (textContent.length > 100) { // Adjust the length as needed
-              var span = document.createElement('span');
+              const span = document.createElement('span');
               span.className = 'truncate';
               span.innerHTML = processedText; // Full processed text with hyperlinks
 
-              var expandBtn = document.createElement('button');
+              const expandBtn = document.createElement('button');
               expandBtn.className = 'expand-btn';
               expandBtn.textContent = 'Read more';
               expandBtn.setAttribute('aria-expanded', 'false');
@@ -399,15 +442,16 @@
 
             row.appendChild(cell);
           });
-          tbody.appendChild(row);
+          frag.appendChild(row);
         }
       });
 
+      tbody.appendChild(frag);
       table.appendChild(tbody);
     }
 
     // Load JSON and initialize the table
-    window.onload = function() {
+    window.addEventListener('DOMContentLoaded', function() {
       fetch(jsonFileUrl)
         .then(function(response) { return response.json(); })
         .then(function(data) {
@@ -420,10 +464,10 @@
           createTable(currentData);
 
           // Populate Type select dynamically
-          var typeSelect = document.getElementById('typeSelect');
-          var types = Array.from(new Set(originalData.map(function(r){ return r['Type']; }))).sort();
+          const typeSelect = document.getElementById('typeSelect');
+          const types = Array.from(new Set(originalData.map(function(r){ return r['Type']; }))).sort();
           types.forEach(function(t){
-            var opt = document.createElement('option');
+            const opt = document.createElement('option');
             opt.value = t;
             opt.textContent = t;
             typeSelect.appendChild(opt);
@@ -431,12 +475,12 @@
 
           // Populate dynamic checkbox options for compromise fields and Is Tier Zero
           function populateCheckboxes(containerId, className, values) {
-            var container = document.getElementById(containerId);
+            const container = document.getElementById(containerId);
             container.innerHTML = '';
             values.forEach(function(val, idx){
-              var label = document.createElement('label');
+              const label = document.createElement('label');
               if (idx > 0) label.style.marginLeft = '16px';
-              var input = document.createElement('input');
+              const input = document.createElement('input');
               input.type = 'checkbox';
               input.className = className;
               input.value = val;
@@ -446,36 +490,44 @@
             });
           }
 
-          var compDefaultVals = Array.from(new Set(originalData.map(function(r){ return String(r['Compromise by default'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
-          var compConfigVals = Array.from(new Set(originalData.map(function(r){ return String(r['Compromise by configuration'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
-          var isTierZeroVals = Array.from(new Set(originalData.map(function(r){ return String(r['Is Tier Zero'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          const compDefaultVals = Array.from(new Set(originalData.map(function(r){ return String(r['Compromise by default'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          const compConfigVals = Array.from(new Set(originalData.map(function(r){ return String(r['Compromise by configuration'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          const isTierZeroVals = Array.from(new Set(originalData.map(function(r){ return String(r['Is Tier Zero'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
 
           populateCheckboxes('compDefaultContainer','filter-cbd',compDefaultVals);
           populateCheckboxes('compConfigContainer','filter-cbc',compConfigVals);
           populateCheckboxes('isTierZeroContainer','filter-ist0',isTierZeroVals);
 
           // Populate dynamic options for IdP, PAS, AdminSDHolder, and Episode
-          var idpVals = Array.from(new Set(originalData.map(function(r){ return String(r['IdP'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          const idpVals = Array.from(new Set(originalData.map(function(r){ return String(r['IdP'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
           populateCheckboxes('idpContainer','filter-idp',idpVals);
 
-          var pasVals = Array.from(new Set(originalData.map(function(r){ return String(r['Privileged access security role'] || '').trim().toUpperCase(); }).filter(function(v){return v.length;}))).sort();
+          const pasVals = Array.from(new Set(originalData.map(function(r){ return String(r['Privileged access security role'] || '').trim().toUpperCase(); }).filter(function(v){return v.length;}))).sort();
           populateCheckboxes('pasContainer','filter-pas',pasVals);
 
-          var adminsdVals = Array.from(new Set(originalData.map(function(r){ return String(r['AdminSDHolder protected'] || '').trim().toUpperCase(); }).filter(function(v){return v.length;}))).sort();
+          const adminsdVals = Array.from(new Set(originalData.map(function(r){ return String(r['AdminSDHolder protected'] || '').trim().toUpperCase(); }).filter(function(v){return v.length;}))).sort();
           populateCheckboxes('adminsdContainer','filter-adminsd',adminsdVals);
 
-          var episodeVals = Array.from(new Set(originalData.map(function(r){ return String(r['What is Tier Zero episode'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
+          const episodeVals = Array.from(new Set(originalData.map(function(r){ return String(r['What is Tier Zero episode'] || '').trim(); }).filter(function(v){return v.length;}))).sort();
           populateCheckboxes('episodeContainer','filter-episode',episodeVals);
 
-          // Add search functionality
-          document.getElementById('searchInput').addEventListener('keyup', function() {
-            applySearchAndFilters();
-          });
+          // Add search functionality with small debounce
+          function debounce(fn, delay){
+            let t;
+            return function(){
+              clearTimeout(t);
+              const args = arguments;
+              const ctx = this;
+              t = setTimeout(function(){ fn.apply(ctx, args); }, delay);
+            };
+          }
+          document.getElementById('searchInput').addEventListener('input', debounce(applySearchAndFilters, 150));
 
           // Filter modal wiring
           document.getElementById('openFilterBtn').addEventListener('click', function(){
-            document.getElementById('filterOverlay').style.display = 'flex';
-            document.getElementById('filterOverlay').setAttribute('aria-hidden', 'false');
+            const overlay = document.getElementById('filterOverlay');
+            overlay.style.display = 'flex';
+            overlay.setAttribute('aria-hidden', 'false');
           });
           document.getElementById('closeFilterBtn').addEventListener('click', closeFilterModal);
           document.getElementById('clearAllFilters').addEventListener('click', function(){
@@ -508,10 +560,11 @@
         })
         .catch(function(err) {
           console.error('Failed to load JSON:', err);
-          document.getElementById('noResultsMessage').style.display = 'block';
-          document.getElementById('noResultsMessage').textContent = 'Failed to load data.';
+          const msg = document.getElementById('noResultsMessage');
+          msg.style.display = 'block';
+          msg.textContent = 'Failed to load data.';
         });
-    };
+    });
 
     function closeFilterModal(){
       document.getElementById('filterOverlay').style.display = 'none';
@@ -519,54 +572,54 @@
     }
 
     function applySearchAndFilters(){
-      var searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      var filteredData = originalData.filter(function(row){
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const filteredData = originalData.filter(function(row){
         // Search
-        var matchesSearch = true;
+        let matchesSearch = true;
         if (searchTerm) {
           matchesSearch = Object.values(row).some(function(value){
-            var str = (value === null || value === undefined) ? '' : String(value);
+            const str = (value === null || value === undefined) ? '' : String(value);
             return str.toLowerCase().indexOf(searchTerm) > -1;
           });
         }
 
         // Type
-        var matchesType = !filterState.type || row['Type'] === filterState.type;
+        const matchesType = !filterState.type || row['Type'] === filterState.type;
         // IdP
-        var matchesIdp = (filterState.idp.size === 0) || filterState.idp.has(row['IdP']);
+        const matchesIdp = (filterState.idp.size === 0) || filterState.idp.has(row['IdP']);
         // Privileged access security role
-        var pasVal = (row['Privileged access security role'] || '').toUpperCase();
-        var matchesPas = (filterState.pas.size === 0) || filterState.pas.has(pasVal);
+        const pasVal = (row['Privileged access security role'] || '').toUpperCase();
+        const matchesPas = (filterState.pas.size === 0) || filterState.pas.has(pasVal);
         // AdminSDHolder protected
-        var adminsdVal = (row['AdminSDHolder protected'] || '').toUpperCase();
-        var matchesAdminsd = (filterState.adminsd.size === 0) || filterState.adminsd.has(adminsdVal);
+        const adminsdVal = (row['AdminSDHolder protected'] || '').toUpperCase();
+        const matchesAdminsd = (filterState.adminsd.size === 0) || filterState.adminsd.has(adminsdVal);
         // Episode (normalize value)
-        var epRaw = row['What is Tier Zero episode'] || '';
-        var epNorm = String(epRaw).trim();
+        const epRaw = row['What is Tier Zero episode'] || '';
+        let epNorm = String(epRaw).trim();
         // Common capitalization normalization
         if (/community/i.test(epNorm)) epNorm = 'Community contribution';
-        var matchesEpisode = (filterState.episode.size === 0) || filterState.episode.has(epNorm);
+        const matchesEpisode = (filterState.episode.size === 0) || filterState.episode.has(epNorm);
 
         // Compromise by default
-        var cbdVal = String(row['Compromise by default'] || '').trim();
-        var matchesCbd = (filterState.compDefault.size === 0) || filterState.compDefault.has(cbdVal);
+        const cbdVal = String(row['Compromise by default'] || '').trim();
+        const matchesCbd = (filterState.compDefault.size === 0) || filterState.compDefault.has(cbdVal);
         // Compromise by configuration
-        var cbcVal = String(row['Compromise by configuration'] || '').trim();
-        var matchesCbc = (filterState.compConfig.size === 0) || filterState.compConfig.has(cbcVal);
+        const cbcVal = String(row['Compromise by configuration'] || '').trim();
+        const matchesCbc = (filterState.compConfig.size === 0) || filterState.compConfig.has(cbcVal);
         // Is Tier Zero
-        var t0Val = String(row['Is Tier Zero'] || '').trim();
-        var matchesT0 = (filterState.isTierZero.size === 0) || filterState.isTierZero.has(t0Val);
+        const t0Val = String(row['Is Tier Zero'] || '').trim();
+        const matchesT0 = (filterState.isTierZero.size === 0) || filterState.isTierZero.has(t0Val);
 
         return matchesSearch && matchesType && matchesIdp && matchesPas && matchesAdminsd && matchesEpisode && matchesCbd && matchesCbc && matchesT0;
       });
 
       // Apply current sorting to the filtered data
       if (currentSortedColumnIndex !== null && currentSortDirection !== 'none') {
-        var n = currentSortedColumnIndex;
-        var dir = currentSortDirection;
+        const n = currentSortedColumnIndex;
+        const dir = currentSortDirection;
         filteredData.sort(function(a, b) {
-          var x = a[headers[n]] ? a[headers[n]].toLowerCase() : '';
-          var y = b[headers[n]] ? b[headers[n]].toLowerCase() : '';
+          const x = a[headers[n]] ? String(a[headers[n]]).toLowerCase() : '';
+          const y = b[headers[n]] ? String(b[headers[n]]).toLowerCase() : '';
           if (x < y) return dir === 'asc' ? -1 : 1;
           if (x > y) return dir === 'asc' ? 1 : -1;
           return 0;
@@ -579,7 +632,7 @@
 
     // Sort by header function with sort indicators
     function sortTable(n) {
-      var currentDir = sortDirections[n] || 'none';
+      const currentDir = sortDirections[n] || 'none';
 
       // Cycle through sort directions: none -> asc -> desc -> none
       if (currentDir === 'none') {
@@ -590,7 +643,7 @@
         sortDirections[n] = 'none';
       }
 
-      var dir = sortDirections[n];
+      const dir = sortDirections[n];
 
       if (dir === 'asc' || dir === 'desc') {
         // Update current sorted column and direction
@@ -603,12 +656,12 @@
         sortDirections[n] = 'none';
       }
 
-      var dataToSort = currentData.slice(); // Make a copy of the current data
+      let dataToSort = currentData.slice(); // Make a copy of the current data
 
       if (dir === 'asc' || dir === 'desc') {
         dataToSort.sort(function(a, b) {
-          var x = a[headers[n]] ? a[headers[n]].toLowerCase() : '';
-          var y = b[headers[n]] ? b[headers[n]].toLowerCase() : '';
+          const x = a[headers[n]] ? String(a[headers[n]]).toLowerCase() : '';
+          const y = b[headers[n]] ? String(b[headers[n]]).toLowerCase() : '';
           if (x < y) return dir === 'asc' ? -1 : 1;
           if (x > y) return dir === 'asc' ? 1 : -1;
           return 0;
